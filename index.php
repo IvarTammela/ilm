@@ -167,7 +167,11 @@ function getGPS(){
   if(!navigator.geolocation){return}
   navigator.geolocation.getCurrentPosition(
     function(p){window.location.href='?lat='+p.coords.latitude+'&lon='+p.coords.longitude},
-    function(){window.location.href='?linn=tallinn'},
+    function(e){
+      var btn=document.querySelector('.geo-btn');
+      if(e.code===1) btn.textContent='⚠ Asukoht blokeeritud – kliki lukuikoonil → Lähtesta load';
+      else btn.textContent='⚠ Asukohta ei saadud – kasuta otsingut';
+    },
     {timeout:10000,enableHighAccuracy:true}
   );
 }
