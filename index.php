@@ -29,8 +29,8 @@ if ($isGeo) {
 <style>*{margin:0;padding:0}body{font-family:-apple-system,system-ui,sans-serif;background:#0f172a;color:#94a3b8;min-height:100vh;display:flex;align-items:center;justify-content:center;font-size:1.2rem}</style>
 </head><body>Asukoha tuvastamine...<script>
 function goTo(lat,lon){window.location.href='?lat='+lat+'&lon='+lon}
-function ipFallback(){fetch('http://ip-api.com/json/?fields=lat,lon').then(r=>r.json()).then(d=>{if(d.lat&&d.lon)goTo(d.lat,d.lon);else window.location.href='?linn=tallinn'}).catch(()=>{window.location.href='?linn=tallinn'})}
-if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){goTo(p.coords.latitude,p.coords.longitude)},ipFallback,{timeout:5000})}else{ipFallback()}
+function ipFallback(){fetch('https://ipwho.is/').then(r=>r.json()).then(d=>{if(d.latitude&&d.longitude)goTo(d.latitude,d.longitude);else window.location.href='?linn=tallinn'}).catch(()=>{window.location.href='?linn=tallinn'})}
+if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){goTo(p.coords.latitude,p.coords.longitude)},ipFallback,{timeout:3000})}else{ipFallback()}
 </script></body></html><?php
     exit;
 } elseif (isset($cities[$page])) {
