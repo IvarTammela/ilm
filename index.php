@@ -23,23 +23,14 @@ if ($isGeo) {
     }
     $city = ['name' => $geoName, 'lat' => $lat, 'lon' => $lon];
 } elseif ($page === 'minu') {
-    // Try IP-based geolocation as fallback
-    $ip = $_SERVER['REMOTE_ADDR'];
-    $ipGeo = @file_get_contents("http://ip-api.com/json/{$ip}?fields=lat,lon,city&lang=et");
-    if ($ipGeo) {
-        $ipData = json_decode($ipGeo, true);
-        if (isset($ipData['lat']) && isset($ipData['lon'])) {
-            header("Location: ?lat={$ipData['lat']}&lon={$ipData['lon']}");
-            exit;
-        }
-    }
-    // Fallback: try browser geolocation, then redirect to Tallinn
     ?><!DOCTYPE html>
 <html lang="et"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Ilm - Asukoht</title>
 <style>*{margin:0;padding:0}body{font-family:-apple-system,system-ui,sans-serif;background:#0f172a;color:#94a3b8;min-height:100vh;display:flex;align-items:center;justify-content:center;font-size:1.2rem}</style>
 </head><body>Asukoha tuvastamine...<script>
-if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){window.location.href='?lat='+p.coords.latitude+'&lon='+p.coords.longitude},function(){window.location.href='?linn=tallinn'},{timeout:5000})}else{window.location.href='?linn=tallinn'}
+function goTo(lat,lon){window.location.href='?lat='+lat+'&lon='+lon}
+function ipFallback(){fetch('http://ip-api.com/json/?fields=lat,lon').then(r=>r.json()).then(d=>{if(d.lat&&d.lon)goTo(d.lat,d.lon);else window.location.href='?linn=tallinn'}).catch(()=>{window.location.href='?linn=tallinn'})}
+if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){goTo(p.coords.latitude,p.coords.longitude)},ipFallback,{timeout:5000})}else{ipFallback()}
 </script></body></html><?php
     exit;
 } elseif (isset($cities[$page])) {
