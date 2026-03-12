@@ -1,4 +1,6 @@
 <?php
+header('Permissions-Policy: geolocation=(self)');
+
 $cities = [
     'tallinn'  => ['name' => 'Tallinn',  'lat' => 59.437,  'lon' => 24.7536],
     'tartu'    => ['name' => 'Tartu',    'lat' => 58.378,  'lon' => 26.7290],
