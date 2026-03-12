@@ -23,15 +23,18 @@ if ($isGeo) {
     }
     $city = ['name' => $geoName, 'lat' => $lat, 'lon' => $lon];
 } elseif ($page === 'minu') {
-    ?><!DOCTYPE html>
-<html lang="et"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Ilm - Asukoht</title>
-<style>*{margin:0;padding:0}body{font-family:-apple-system,system-ui,sans-serif;background:#0f172a;color:#94a3b8;min-height:100vh;display:flex;align-items:center;justify-content:center;font-size:1.2rem}</style>
-</head><body>Asukoha tuvastamine...<script>
-function goTo(lat,lon){window.location.href='?lat='+lat+'&lon='+lon}
-function ipFallback(){fetch('https://ipwho.is/').then(r=>r.json()).then(d=>{if(d.latitude&&d.longitude)goTo(d.latitude,d.longitude);else window.location.href='?linn=tallinn'}).catch(()=>{window.location.href='?linn=tallinn'})}
-if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){goTo(p.coords.latitude,p.coords.longitude)},ipFallback,{timeout:3000})}else{ipFallback()}
-</script></body></html><?php
+    // Serveripoolne IP lookup - CORS probleemi pole
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
+    $ip = explode(',', $ip)[0];
+    $ipGeo = @file_get_contents("http://ip-api.com/json/{$ip}?fields=lat,lon");
+    if ($ipGeo) {
+        $ipData = json_decode($ipGeo, true);
+        if (!empty($ipData['lat']) && !empty($ipData['lon'])) {
+            header("Location: ?lat={$ipData['lat']}&lon={$ipData['lon']}");
+            exit;
+        }
+    }
+    header('Location: ?linn=tallinn');
     exit;
 } elseif (isset($cities[$page])) {
     $city = $cities[$page];
