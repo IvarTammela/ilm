@@ -141,6 +141,9 @@ $weekdays = ['Pühapäev','Esmaspäev','Teisipäev','Kolmapäev','Neljapäev','R
         <a href="?linn=<?= $key ?>"<?= (!$isGeo && $page === $key) ? ' class="active"' : '' ?>><?= $val['name'] ?></a>
       <?php endforeach; ?>
     </nav>
+    <div class="map">
+      <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=<?= $city['lon']-0.05 ?>%2C<?= $city['lat']-0.03 ?>%2C<?= $city['lon']+0.05 ?>%2C<?= $city['lat']+0.03 ?>&layer=mapnik&marker=<?= $city['lat'] ?>%2C<?= $city['lon'] ?>" style="width:100%;height:200px;border:none;border-radius:12px;margin-bottom:1.5rem"></iframe>
+    </div>
     <div class="current">
       <div class="icon"><?= weatherIcon($c['weather_code']) ?></div>
       <div class="temp"><?= round($c['temperature_2m']) ?>°C</div>
