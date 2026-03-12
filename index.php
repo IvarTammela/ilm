@@ -108,6 +108,8 @@ $weekdays = ['Pühapäev','Esmaspäev','Teisipäev','Kolmapäev','Neljapäev','R
     .search input::placeholder{color:#64748b}
     .search button{background:#1e40af;color:#fff;border:none;padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-size:1rem}
     .search button:hover{background:#1d4ed8}
+    .geo-btn{background:none;border:1px solid #334155;color:#38bdf8;padding:.3rem .6rem;border-radius:6px;cursor:pointer;font-size:.9rem}
+    .geo-btn:hover{background:#1e293b}
     .current{text-align:center;padding:2rem;background:#1e293b;border-radius:12px;margin-bottom:1.5rem}
     .current .icon{font-size:4rem}
     .current .temp{font-size:3.5rem;font-weight:700}
@@ -132,6 +134,7 @@ $weekdays = ['Pühapäev','Esmaspäev','Teisipäev','Kolmapäev','Neljapäev','R
       </form>
     </div>
     <nav>
+      <button class="geo-btn" onclick="getGPS()">📍 Minu asukoht</button>
       <?php foreach ($cities as $key => $val): ?>
         <a href="?linn=<?= $key ?>"<?= (!$isGeo && $page === $key) ? ' class="active"' : '' ?>><?= $val['name'] ?></a>
       <?php endforeach; ?>
@@ -159,5 +162,15 @@ $weekdays = ['Pühapäev','Esmaspäev','Teisipäev','Kolmapäev','Neljapäev','R
       <?php endfor; ?>
     </div>
   </div>
+<script>
+function getGPS(){
+  if(!navigator.geolocation){alert('Brauser ei toeta asukohta');return}
+  navigator.geolocation.getCurrentPosition(
+    function(p){window.location.href='?lat='+p.coords.latitude+'&lon='+p.coords.longitude},
+    function(){window.location.href='?linn=tallinn'},
+    {timeout:10000,enableHighAccuracy:true}
+  );
+}
+</script>
 </body>
 </html>
