@@ -23,18 +23,29 @@ if ($isGeo) {
     }
     $city = ['name' => $geoName, 'lat' => $lat, 'lon' => $lon];
 } elseif ($page === 'minu') {
-    // Serveripoolne IP lookup - CORS probleemi pole
+    // IP fallback koordinaadid serveripoolselt
+    $ipLat = '';
+    $ipLon = '';
     $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
     $ip = explode(',', $ip)[0];
     $ipGeo = @file_get_contents("http://ip-api.com/json/{$ip}?fields=lat,lon");
     if ($ipGeo) {
         $ipData = json_decode($ipGeo, true);
         if (!empty($ipData['lat']) && !empty($ipData['lon'])) {
-            header("Location: ?lat={$ipData['lat']}&lon={$ipData['lon']}");
-            exit;
+            $ipLat = $ipData['lat'];
+            $ipLon = $ipData['lon'];
         }
     }
-    header('Location: ?linn=tallinn');
+    ?><!DOCTYPE html>
+<html lang="et"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ilm - Asukoht</title>
+<style>*{margin:0;padding:0}body{font-family:-apple-system,system-ui,sans-serif;background:#0f172a;color:#94a3b8;min-height:100vh;display:flex;align-items:center;justify-content:center;font-size:1.2rem}</style>
+</head><body>Asukoha tuvastamine...<script>
+function goTo(lat,lon){window.location.href='?lat='+lat+'&lon='+lon}
+var ipLat=<?= $ipLat ?: 'null' ?>,ipLon=<?= $ipLon ?: 'null' ?>;
+function ipFallback(){if(ipLat&&ipLon)goTo(ipLat,ipLon);else window.location.href='?linn=tallinn'}
+if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){goTo(p.coords.latitude,p.coords.longitude)},ipFallback,{timeout:5000})}else{ipFallback()}
+</script></body></html><?php
     exit;
 } elseif (isset($cities[$page])) {
     $city = $cities[$page];
