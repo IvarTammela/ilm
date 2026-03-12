@@ -164,7 +164,7 @@ $weekdays = ['Pühapäev','Esmaspäev','Teisipäev','Kolmapäev','Neljapäev','R
   </div>
 <script>
 function getGPS(){
-  if(!navigator.geolocation){alert('Brauser ei toeta asukohta');return}
+  if(!navigator.geolocation){return}
   navigator.geolocation.getCurrentPosition(
     function(p){window.location.href='?lat='+p.coords.latitude+'&lon='+p.coords.longitude},
     function(){window.location.href='?linn=tallinn'},
