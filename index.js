@@ -74,9 +74,9 @@ function renderPage(city, data) {
       </div>`;
   }
 
-  let cityLinks = '';
+  let cityLinks = '<a href="/minu"' + (city.isGeo ? ' class="active"' : '') + '>Minu asukoht</a> ';
   for (const [key, val] of Object.entries(CITIES)) {
-    const active = val.name === city.name ? ' class="active"' : '';
+    const active = !city.isGeo && val.name === city.name ? ' class="active"' : '';
     cityLinks += `<a href="/${key}"${active}>${val.name}</a> `;
   }
 
@@ -124,8 +124,71 @@ function renderPage(city, data) {
 </html>`;
 }
 
+function renderGeoPage() {
+  return `<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ilm - Minu asukoht</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 2rem; display: flex; align-items: center; justify-content: center; }
+    .msg { text-align: center; color: #94a3b8; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <div class="msg">Asukoha tuvastamine...</div>
+  <script>
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => { window.location.href = '/geo?lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude; },
+        () => { window.location.href = '/tallinn'; }
+      );
+    } else {
+      window.location.href = '/tallinn';
+    }
+  </script>
+</body>
+</html>`;
+}
+
+async function reverseGeocode(lat, lon) {
+  try {
+    const data = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=et`);
+    return data.address.city || data.address.town || data.address.village || data.address.municipality || 'Minu asukoht';
+  } catch {
+    return 'Minu asukoht';
+  }
+}
+
 const server = http.createServer(async (req, res) => {
-  const path = req.url.replace(/\/$/, '') || '/tallinn';
+  const url = new URL(req.url, 'http://localhost');
+  const path = url.pathname.replace(/\/$/, '') || '/tallinn';
+
+  if (path === '/minu') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(renderGeoPage());
+  }
+
+  if (path === '/geo') {
+    const lat = parseFloat(url.searchParams.get('lat'));
+    const lon = parseFloat(url.searchParams.get('lon'));
+    if (isNaN(lat) || isNaN(lon)) {
+      res.writeHead(302, { Location: '/tallinn' });
+      return res.end();
+    }
+    try {
+      const [data, name] = await Promise.all([getWeather(lat, lon), reverseGeocode(lat, lon)]);
+      const city = { name, lat, lon, isGeo: true };
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(renderPage(city, data));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      return res.end('Viga: ' + err.message);
+    }
+  }
+
   const cityKey = path.slice(1).toLowerCase();
   const city = CITIES[cityKey];
 
