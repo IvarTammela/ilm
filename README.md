@@ -26,15 +26,25 @@ Ava brauseris: http://localhost:3000
 
 Kui tahad, et teised saaksid igalt poolt ligi:
 
-```bash
-# Paigalda cloudflared (macOS)
-brew install cloudflared
+### Variant 1: ngrok
 
-# Käivita tunnel
+1. Paigalda: `brew install ngrok`
+2. Loo tasuta konto: https://dashboard.ngrok.com/signup
+3. Lisa authtoken: `ngrok config add-authtoken SINU_TOKEN`
+4. Loo tasuta domeen: https://dashboard.ngrok.com/domains
+
+```bash
+ngrok http 3000 --url=sinu-domeen.ngrok-free.dev
+```
+
+### Variant 2: Cloudflare (kontota)
+
+```bash
+brew install cloudflared
 cloudflared tunnel --url http://localhost:3000
 ```
 
-Terminali ilmub avalik URL (nt `https://xxx.trycloudflare.com`), mida saab jagada.
+Terminali ilmub avalik URL, mida saab jagada.
 
 ## Linnad
 
