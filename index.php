@@ -39,13 +39,34 @@ if ($isGeo) {
     ?><!DOCTYPE html>
 <html lang="et"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Ilm - Asukoht</title>
-<style>*{margin:0;padding:0}body{font-family:-apple-system,system-ui,sans-serif;background:#0f172a;color:#94a3b8;min-height:100vh;display:flex;align-items:center;justify-content:center;font-size:1.2rem}</style>
-</head><body>Asukoha tuvastamine...<script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.5rem;padding:2rem}
+.btn{background:#1e40af;color:#fff;border:none;padding:1rem 2rem;border-radius:10px;font-size:1.1rem;cursor:pointer}
+.btn:hover{background:#1d4ed8}
+.sub{color:#94a3b8;font-size:.9rem}
+#status{color:#94a3b8}
+</style>
+</head><body>
+<button class="btn" onclick="getGPS()">📍 Tuvasta minu täpne asukoht</button>
+<div class="sub">Vajab brauseri asukoha luba</div>
+<div id="status"></div>
+<?php if ($ipLat && $ipLon): ?>
+<a href="?lat=<?= $ipLat ?>&lon=<?= $ipLon ?>" style="color:#38bdf8;margin-top:1rem">Või kasuta ligikaudset asukohta (IP põhine)</a>
+<?php endif; ?>
+<script>
 function goTo(lat,lon){window.location.href='?lat='+lat+'&lon='+lon}
-var ipLat=<?= $ipLat ?: 'null' ?>,ipLon=<?= $ipLon ?: 'null' ?>;
-function ipFallback(){if(ipLat&&ipLon)goTo(ipLat,ipLon);else window.location.href='?linn=tallinn'}
-if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){goTo(p.coords.latitude,p.coords.longitude)},ipFallback,{timeout:5000})}else{ipFallback()}
-</script></body></html><?php
+function getGPS(){
+  document.getElementById('status').textContent='Asukoha tuvastamine...';
+  if(!navigator.geolocation){document.getElementById('status').textContent='Brauser ei toeta asukohta';return}
+  navigator.geolocation.getCurrentPosition(
+    function(p){goTo(p.coords.latitude,p.coords.longitude)},
+    function(e){document.getElementById('status').textContent='Asukoha tuvastamine ebaõnnestus: '+(e.code===1?'Luba keelatud':e.code===2?'Asukoht pole saadaval':'Aegus');},
+    {timeout:10000,enableHighAccuracy:true}
+  );
+}
+</script>
+</body></html><?php
     exit;
 } elseif (isset($cities[$page])) {
     $city = $cities[$page];
